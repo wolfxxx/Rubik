@@ -187,6 +187,8 @@
     const hudPanel = document.getElementById('hudPanel');
     const hudToggle = document.getElementById('hudToggle');
     const scene = new THREE.Scene();
+    const defaultCameraPos = new THREE.Vector3(5.6, 4.2, 6.2);
+    const mobileCameraPos = new THREE.Vector3(6.4, 4.7, 7.2);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -197,7 +199,7 @@
     app.appendChild(renderer.domElement);
 
     const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(5.6, 4.2, 6.2);
+    camera.position.copy(defaultCameraPos);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -398,14 +400,29 @@
       hudToggle.setAttribute('aria-expanded', String(!collapsed));
     }
 
+    function applyMobileFraming(isMobile, resetCamera = false) {
+      cubeRoot.position.y = isMobile ? -0.55 : 0;
+      controls.target.set(0, isMobile ? 0.35 : 0, 0);
+      controls.minDistance = isMobile ? 5 : 4;
+      controls.maxDistance = isMobile ? 15 : 13;
+
+      if (resetCamera) {
+        camera.position.copy(isMobile ? mobileCameraPos : defaultCameraPos);
+      }
+
+      controls.update();
+    }
+
     function syncHudForViewport() {
       if (mobileHudQuery.matches) {
         if (!hudPanel.dataset.mobileInit) {
           setHudCollapsed(true);
+          applyMobileFraming(true, true);
           hudPanel.dataset.mobileInit = '1';
         }
       } else {
         setHudCollapsed(false);
+        applyMobileFraming(false, true);
         delete hudPanel.dataset.mobileInit;
       }
     }
