@@ -188,7 +188,7 @@
     const hudToggle = document.getElementById('hudToggle');
     const scene = new THREE.Scene();
     const defaultCameraPos = new THREE.Vector3(5.6, 4.2, 6.2);
-    const mobileCameraPos = new THREE.Vector3(7.6, 5.4, 8.7);
+    const mobileCameraPos = new THREE.Vector3(8.4, 5.9, 9.8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -401,10 +401,10 @@
     }
 
     function applyMobileFraming(isMobile, resetCamera = false) {
-      cubeRoot.position.y = isMobile ? -1.15 : 0;
+      cubeRoot.position.y = isMobile ? -1.35 : 0;
       controls.target.set(0, isMobile ? 0.35 : 0, 0);
-      controls.minDistance = isMobile ? 6.0 : 4;
-      controls.maxDistance = isMobile ? 17 : 13;
+      controls.minDistance = isMobile ? 6.6 : 4;
+      controls.maxDistance = isMobile ? 18 : 13;
 
       if (resetCamera) {
         camera.position.copy(isMobile ? mobileCameraPos : defaultCameraPos);
