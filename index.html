@@ -55,6 +55,22 @@
       backdrop-filter: blur(8px);
       box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
       user-select: none;
+      z-index: 20;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .hud-toggle {
+      display: none;
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      z-index: 30;
+      width: auto;
+      padding: 8px 12px;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+      background: rgba(18, 26, 46, 0.82);
+      border-color: var(--panel-border);
     }
 
     .title {
@@ -113,12 +129,32 @@
       color: var(--accent);
       font-family: Consolas, "SFMono-Regular", Menlo, monospace;
     }
+
+    @media (max-width: 768px) {
+      .hud {
+        width: min(92vw, 360px);
+        max-height: calc(100dvh - 24px);
+        overflow: auto;
+      }
+
+      .hud.mobile-collapsed {
+        transform: translateY(calc(-100% - 20px));
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .hud-toggle {
+        display: inline-block;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="app"></div>
 
-  <div class="hud">
+  <button id="hudToggle" class="hud-toggle" aria-expanded="false">Show Controls</button>
+
+  <div class="hud" id="hudPanel">
     <h1 class="title">3D Rubik's Cube Simulator</h1>
     <p class="hint">
       Drag to orbit, wheel to zoom. Click a move or use keys:
@@ -148,6 +184,8 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     const app = document.getElementById('app');
+    const hudPanel = document.getElementById('hudPanel');
+    const hudToggle = document.getElementById('hudToggle');
     const scene = new THREE.Scene();
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -351,6 +389,34 @@
         enqueue(m, Math.random() > 0.5);
       }
     });
+
+    const mobileHudQuery = window.matchMedia('(max-width: 768px)');
+
+    function setHudCollapsed(collapsed) {
+      hudPanel.classList.toggle('mobile-collapsed', collapsed);
+      hudToggle.textContent = collapsed ? 'Show Controls' : 'Hide Controls';
+      hudToggle.setAttribute('aria-expanded', String(!collapsed));
+    }
+
+    function syncHudForViewport() {
+      if (mobileHudQuery.matches) {
+        if (!hudPanel.dataset.mobileInit) {
+          setHudCollapsed(true);
+          hudPanel.dataset.mobileInit = '1';
+        }
+      } else {
+        setHudCollapsed(false);
+        delete hudPanel.dataset.mobileInit;
+      }
+    }
+
+    hudToggle.addEventListener('click', () => {
+      if (!mobileHudQuery.matches) return;
+      setHudCollapsed(!hudPanel.classList.contains('mobile-collapsed'));
+    });
+
+    mobileHudQuery.addEventListener('change', syncHudForViewport);
+    syncHudForViewport();
 
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
